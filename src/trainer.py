@@ -157,7 +157,12 @@ class Trainer(QThread):
             state_action_values = q_values.gather(1, actions_t.unsqueeze(1))
             
             # Next state Q values using Double DQN
-            next_state_values = torch.zeros(config.BATCH_SIZE, device=self.agent.device)
+            # Ensure dtype matches autocast precision to avoid type mismatch errors
+            next_state_values = torch.zeros(
+                config.BATCH_SIZE,
+                device=self.agent.device,
+                dtype=q_values.dtype,
+            )
             non_final_mask = ~dones_t
             
             if non_final_mask.sum() > 0:
